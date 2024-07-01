@@ -62,56 +62,65 @@
     </form>
 
     <script>
-        const form = document.getElementById('contactForm');
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const firstName = document.getElementById('firstName').value;
-            const lastName = document.getElementById('lastName').value;
-            const phone = document.getElementById('phone').value;
-            const email = document.getElementById('email').value;
-            
-            // בדיקת תקינות מספר הטלפון
-            const phoneRegex = /^05[0-9]{8}$/;
-            if (!phoneRegex.test(phone)) {
-                alert('נא להזין מספר טלפון ישראלי תקין');
-                return;
-            }
-            
-            // בדיקת תקינות כתובת האימייל
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) {
-                alert('נא להזין כתובת אימייל תקינה');
-                return;
-            }
-            
-            const timestamp = new Date().toISOString();
-            
-            const data = {
-                firstName,
-                lastName,
-                phone,
-                email,
-                timestamp
-            };
-            
-            try {
-                const response = await fetch('https://script.google.com/macros/s/AKfycbziwO8BOS5rhonGq_kgesWJajdhNoj7k-W0FMe5PbJ5c7t5Efhr9sK8VxPMo8NGczQ46g/exec', {
-                    method: 'POST',
-                    body: JSON.stringify(data)
-                });
-                
-                if (response.ok) {
-                    alert('הנתונים נשלחו בהצלחה!');
-                    form.reset();
-                } else {
-                    throw new Error('שגיאה בשליחת הנתונים');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('אירעה שגיאה בשליחת הנתונים. נא לנסות שוב מאוחר יותר.');
-            }
+const form = document.getElementById('contactForm');
+form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const firstName = document.getElementById('firstName').value;
+    const lastName = document.getElementById('lastName').value;
+    const phone = document.getElementById('phone').value;
+    const email = document.getElementById('email').value;
+    
+    // בדיקת תקינות מספר הטלפון
+    const phoneRegex = /^05[0-9]{8}$/;
+    if (!phoneRegex.test(phone)) {
+        alert('נא להזין מספר טלפון ישראלי תקין');
+        return;
+    }
+    
+    // בדיקת תקינות כתובת האימייל
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        alert('נא להזין כתובת אימייל תקינה');
+        return;
+    }
+    
+    const timestamp = new Date().toISOString();
+    
+    const data = {
+        firstName,
+        lastName,
+        phone,
+        email,
+        timestamp
+    };
+    
+    try {
+        const response = await fetch('https://script.google.com/macros/s/AKfycbwUY42kuON4ffoUGuMLcmOSZmiE8FhpOc-X3UYJF5DSPk8jqEiUComn8ngafyl42LcGvQ/exec', {
+            method: 'POST',
+            mode: 'cors',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
         });
-    </script>
+        
+        if (response.ok) {
+            const text = await response.text();
+            if (text === "Success") {
+                alert('הנתונים נשלחו בהצלחה!');
+                form.reset();
+            } else {
+                throw new Error('תגובה לא צפויה מהשרת');
+            }
+        } else {
+            throw new Error('שגיאה בשליחת הנתונים');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('אירעה שגיאה בשליחת הנתונים. נא לנסות שוב מאוחר יותר.');
+    }
+});
+</script>
 </body>
 </html>
