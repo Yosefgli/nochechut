@@ -93,31 +93,27 @@
         };
         
         try {
-            const response = await fetch('https://script.google.com/macros/s/AKfycbyfbw8q9OZ9AB9BA0boy5dyvMKAJgOhCIUZE2VF0is1hyyVaMn4x7T8cuwthgOEyOhIjg/exec', {
-                method: 'POST',
-                mode: 'cors',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data)
-            });
-            
-            if (response.ok) {
-                const result = await response.json();
-                if (result.result === "success") {
-                    alert('הנתונים נשלחו בהצלחה!');
-                    form.reset();
-                } else {
-                    throw new Error('תגובה לא צפויה מהשרת');
-                }
-            } else {
-                throw new Error('שגיאה בשליחת הנתונים');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            alert('אירעה שגיאה בשליחת הנתונים. נא לנסות שוב מאוחר יותר.');
-        }
+    const response = await fetch('https://script.google.com/macros/s/AKfycbxKbSR7R5FjegoCneXUbNcoJHkKVIGbdKlC-lzLlSxkDXI0Q214N1do-BgPp_jiqXQruQ/exec', {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
     });
-    </script>
-</body>
-</html>
+    
+    if (response.ok) {
+        const result = await response.json();
+        if (result.result === "success") {
+            alert('הנתונים נשלחו בהצלחה!');
+            form.reset();
+        } else {
+            throw new Error(result.message || 'תגובה לא צפויה מהשרת');
+        }
+    } else {
+        throw new Error(`שגיאה בשליחת הנתונים: ${response.status} ${response.statusText}`);
+    }
+} catch (error) {
+    console.error('Error:', error);
+    alert(`אירעה שגיאה בשליחת הנתונים: ${error.message}`);
+}
