@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <script>
+        // ... (אותו קוד JavaScript כמו קודם) ...
+        async function sendDataToWebhook(code, imageUrl) {
+            // ... (אותו קוד כמו קודם) ...
+            if (response.ok) {
+                loader.style.display = 'none';
+                showSuccessOverlay();
+                // לאחר הצלחה, חזור לדף הראשי
+                setTimeout(() => {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const action = urlParams.get('action');
+                    window.location.href = `index.html`;
+                }, 2000); // עיכוב של 2 שניות לפני החזרה
+            }
+            // ... (אותו קוד כמו קודם) ...
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+             const urlParams = new URLSearchParams(window.location.search);
+             const action = urlParams.get('action');
+             if(!action){
+                window.location.href = `index.html`;
+             } else {
+                startCamera();
+             }
+        });
+    </script>
+</body>
+</html>
