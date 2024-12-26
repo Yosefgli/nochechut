@@ -59,11 +59,11 @@
        }
 
        .entry-button {
-           background: rgba(76, 175, 80, 0.3);
+           background: #4CAF50;
        }
 
        .exit-button {
-           background: rgba(244, 67, 54, 0.3);
+           background: #f44336;
        }
 
        .action-button:hover {
@@ -240,8 +240,8 @@
 </head>
 <body>
    <div id="mainScreen" class="main-screen active">
-       <button class="action-button entry-button" onclick="showCodeScreen('entry')">כניסה</button>
-       <button class="action-button exit-button" onclick="showCodeScreen('exit')">יציאה</button>
+       <button class="action-button entry-button" onclick="showCodeScreen('entry')">вход</button>
+       <button class="action-button exit-button" onclick="showCodeScreen('exit')">Выход</button>
    </div>
 
    <div id="codeScreen" class="container">
@@ -271,8 +271,8 @@
    <div id="successOverlay">
        <div class="success-content">
            <div class="success-icon">✓</div>
-           <h2>הפעולה בוצעה בהצלחה!</h2>
-           <button class="close-button" onclick="returnToMain()">סגור</button>
+           <h2>Операция прошла успешно!</h2>
+           <button class="close-button" onclick="returnToMain()">закрыть</button>
        </div>
    </div>
 
@@ -290,7 +290,7 @@
        const loader = document.getElementById('loader');
        const mainScreen = document.getElementById('mainScreen');
        const codeScreen = document.getElementById('codeScreen');
-       const webhookUrl = 'https://hook.integrator.boost.space/b424j8t6ximfa24pcsy29cw3sjyayffc';
+       const webhookUrl = 'https://hook.integrator.boost.space/8g26d1dsvoqpff3ci20snwu5afxqysqs';
        const imgbbApiKey = '8a5d2394f52a7b0dba4433d8255a7436';
 
        function showCodeScreen(action) {
