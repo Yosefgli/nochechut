@@ -426,8 +426,16 @@ function confirmAction() {
 }
 
 function cancelAction() {
-    // חזור למסך הקודם
+    // הסתר את חלונית האישור
     document.getElementById('confirmationOverlay').style.display = 'none';
+    // עצור את המצלמה
+    stopCamera();
+    // נקה את הקוד
+    code = '';
+    display.textContent = '';
+    // החזר למסך הראשי
+    codeScreen.classList.remove('active');
+    mainScreen.classList.add('active');
 }
 
        async function uploadToImgBB(base64Image) {
