@@ -305,7 +305,7 @@
            codeScreen.classList.remove('active');
            mainScreen.classList.add('active');
            code = '';
-           display.textContent = code;
+           display.textContent = '';
            stopCamera();
        }
 
@@ -428,7 +428,7 @@
                    code += value;
                }
                
-               display.textContent = '*'.repeat(code.length);
+               display.textContent = code;
            });
        });
 
