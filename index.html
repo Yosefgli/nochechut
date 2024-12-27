@@ -66,6 +66,16 @@
            background: #f44336;
        }
 
+      .shabbat-button {
+    background: #FFD700;  /* צהוב */
+    color: black;  /* טקסט שחור בשביל קריאות טובה יותר על רקע צהוב */
+}
+
+.event-button {
+    background: white;
+    color: black;  /* טקסט שחור בשביל קריאות טובה יותר על רקע לבן */
+}
+
        .action-button:hover {
            transform: scale(1.02);
        }
@@ -240,9 +250,11 @@
 </head>
 <body>
    <div id="mainScreen" class="main-screen active">
-       <button class="action-button entry-button" onclick="showCodeScreen('entry')">вход</button>
-       <button class="action-button exit-button" onclick="showCodeScreen('exit')">Выход</button>
-   </div>
+    <button class="action-button entry-button" onclick="showCodeScreen('entry')">вход</button>
+    <button class="action-button exit-button" onclick="showCodeScreen('exit')">Выход</button>
+    <button class="action-button shabbat-button" onclick="showCodeScreen('shabbat')">שבת</button>
+    <button class="action-button event-button" onclick="showCodeScreen('event')">אירוע</button>
+</div>
 
    <div id="codeScreen" class="container">
        <div id="videoContainer">
