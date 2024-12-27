@@ -76,6 +76,10 @@
     color: black;  /* טקסט שחור בשביל קריאות טובה יותר על רקע לבן */
 }
 
+      .shabbat-button, .event-button {
+    display: none;
+}
+
        .action-button:hover {
            transform: scale(1.02);
        }
@@ -235,6 +239,28 @@
            display: block;
        }
 
+      #confirmationOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    z-index: 1000;
+}
+
+#confirmationDetails {
+    font-size: 18px;
+    line-height: 1.5;
+    color: #333;
+}
+
+#confirmationDetails p {
+    margin: 10px 0;
+}
+
        @media (max-width: 380px) {
            .key {
                padding: 15px;
@@ -252,8 +278,8 @@
    <div id="mainScreen" class="main-screen active">
     <button class="action-button entry-button" onclick="showCodeScreen('entry')">вход</button>
     <button class="action-button exit-button" onclick="showCodeScreen('exit')">Выход</button>
-    <disabled button class="action-button shabbat-button" onclick="showCodeScreen('shabbat')">Суббота</button>
-    <disabled button class="action-button event-button" onclick="showCodeScreen('event')">банкет</button>
+    <button class="action-button shabbat-button" onclick="showCodeScreen('shabbat')">Суббота</button>
+    <button class="action-button event-button" onclick="showCodeScreen('event')">банкет</button>
 </div>
 
    <div id="codeScreen" class="container">
@@ -279,6 +305,22 @@
            <button class="key enter">⏎</button>
        </div>
    </div>
+
+   <div id="confirmationOverlay" style="display: none;">
+    <div class="success-content">
+        <h2>אישור פעולה</h2>
+        <div id="confirmationDetails" style="text-align: right; margin: 20px 0;">
+            <p>סוג פעולה: <span id="actionType"></span></p>
+            <p>שעה: <span id="currentTime"></span></p>
+            <p>קוד: <span id="confirmCode"></span></p>
+            <img id="capturedImage" style="max-width: 100%; margin-top: 10px; border-radius: 10px;" />
+        </div>
+        <div style="display: flex; gap: 10px; justify-content: center;">
+            <button class="close-button" onclick="confirmAction()">אישור</button>
+            <button class="close-button" style="background: #f44336;" onclick="cancelAction()">ביטול</button>
+        </div>
+    </div>
+</div>
 
    <div id="successOverlay">
        <div class="success-content">
@@ -345,16 +387,48 @@
        }
 
        function captureAndUpload() {
-           loader.style.display = 'flex';
-           
-           canvas.width = video.videoWidth;
-           canvas.height = video.videoHeight;
-           canvas.getContext('2d').drawImage(video, 0, 0);
-           
-           const imageBase64 = canvas.toDataURL('image/jpeg', 0.7).split(',')[1];
-           
-           uploadToImgBB(imageBase64);
-       }
+    loader.style.display = 'flex';
+    
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+    
+    const imageBase64 = canvas.toDataURL('image/jpeg', 0.7);
+    
+    // הצג את חלונית האישור
+    showConfirmationOverlay(imageBase64);
+}
+
+function showConfirmationOverlay(imageBase64) {
+    loader.style.display = 'none';
+    
+    // עדכן את פרטי האישור
+    document.getElementById('actionType').textContent = 
+        currentAction === 'entry' ? 'כניסה' : 'יציאה';
+    
+    const now = new Date();
+    document.getElementById('currentTime').textContent = 
+        now.toLocaleTimeString('he-IL');
+    
+    document.getElementById('confirmCode').textContent = code;
+    document.getElementById('capturedImage').src = imageBase64;
+    
+    // הצג את החלונית
+    document.getElementById('confirmationOverlay').style.display = 'block';
+}
+
+function confirmAction() {
+    // המשך עם העלאת התמונה והשליחה לוובהוק
+    const imageBase64 = document.getElementById('capturedImage').src.split(',')[1];
+    document.getElementById('confirmationOverlay').style.display = 'none';
+    loader.style.display = 'flex';
+    uploadToImgBB(imageBase64);
+}
+
+function cancelAction() {
+    // חזור למסך הקודם
+    document.getElementById('confirmationOverlay').style.display = 'none';
+}
 
        async function uploadToImgBB(base64Image) {
            const formData = new FormData();
