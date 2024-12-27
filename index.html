@@ -245,25 +245,6 @@
                padding: 30px;
                font-size: 28px;
            }
-
-          .shabbat-button {
-    background: #FFD700;
-    color: black;
-}
-
-.event-button {
-    background: white;
-    color: black;
-}
-
-#subScreen {
-    display: none;
-    width: 100%;
-}
-
-#subScreen.active {
-    display: block;
-}
        }
    </style>
 </head>
@@ -273,11 +254,6 @@
     <button class="action-button exit-button" onclick="showCodeScreen('exit')">Выход</button>
     <button class="action-button shabbat-button" onclick="showCodeScreen('shabbat')">Суббота</button>
     <button class="action-button event-button" onclick="showCodeScreen('event')">банкет</button>
-</div>
-
-   <div id="subScreen" class="main-screen">
-    <button class="action-button entry-button" onclick="selectSubAction('entry')">вход</button>
-    <button class="action-button exit-button" onclick="selectSubAction('exit')">Выход</button>
 </div>
 
    <div id="codeScreen" class="container">
@@ -319,55 +295,31 @@
    <script>
        let code = '';
        let currentAction = '';
-       let mainAction = '';  // חדש
-       let subAction = '';   // חדש
        const display = document.getElementById('display');
        const video = document.getElementById('video');
        const canvas = document.getElementById('canvas');
        const successOverlay = document.getElementById('successOverlay');
        const loader = document.getElementById('loader');
        const mainScreen = document.getElementById('mainScreen');
-       const subScreen = document.getElementById('subScreen');  // חדש
        const codeScreen = document.getElementById('codeScreen');
        const webhookUrl = 'https://hook.integrator.boost.space/qz92yedayd5kqvxihlc9b8xg6umk87pn';
        const imgbbApiKey = '8a5d2394f52a7b0dba4433d8255a7436';
 
        function showCodeScreen(action) {
-    mainAction = action;
-    
-    if (action === 'entry' || action === 'exit') {
-        // מעבר ישיר למסך המצלמה
-        currentAction = action;
-        mainScreen.classList.remove('active');
-        codeScreen.classList.add('active');
-        startCamera();
-    } else {
-        // מעבר למסך בחירת כניסה/יציאה
-        mainScreen.classList.remove('active');
-        subScreen.classList.add('active');
-    }
-}
-
-      function selectSubAction(action) {
-    subAction = action;
-    currentAction = mainAction + '_' + subAction;  // למשל: "shabbat_entry" או "event_exit"
-    
-    subScreen.classList.remove('active');
-    codeScreen.classList.add('active');
-    startCamera();
-}
+           currentAction = action;
+           mainScreen.classList.remove('active');
+           codeScreen.classList.add('active');
+           startCamera();
+       }
 
        function returnToMain() {
-    successOverlay.style.display = 'none';
-    codeScreen.classList.remove('active');
-    subScreen.classList.remove('active');
-    mainScreen.classList.add('active');
-    code = '';
-    display.textContent = '';
-    mainAction = '';
-    subAction = '';
-    stopCamera();
-}
+           successOverlay.style.display = 'none';
+           codeScreen.classList.remove('active');
+           mainScreen.classList.add('active');
+           code = '';
+           display.textContent = '';
+           stopCamera();
+       }
 
        function stopCamera() {
            if (video.srcObject) {
