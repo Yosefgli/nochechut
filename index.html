@@ -305,7 +305,7 @@
            codeScreen.classList.remove('active');
            mainScreen.classList.add('active');
            code = '';
-           display.textContent = '';
+           display.textContent = code;
            stopCamera();
        }
 
@@ -371,39 +371,44 @@
        }
 
        async function sendDataToWebhook(code, imageUrl) {
-           try {
-               const payload = {
-                   code: code,
-                   imageUrl: imageUrl,
-                   action: currentAction
-               };
+    try {
+        const payload = {
+            code: code,
+            imageUrl: imageUrl,
+            action: currentAction
+        };
 
-               console.log('Sending payload:', payload);
+        console.log('Sending payload:', payload);
 
-               const response = await fetch(webhookUrl, {
-                   method: 'POST',
-                   headers: {
-                       'Content-Type': 'application/json',
-                       'Accept': 'application/json'
-                   },
-                   body: JSON.stringify(payload)
-               });
-               
-               console.log('Response status:', response.status);
-               
-               const responseData = await response.text();
-               console.log('Response data:', responseData);
+        const response = await fetch(webhookUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+        
+        console.log('Response status:', response.status);
+        
+        const responseData = await response.text();
+        console.log('Response data:', responseData);
 
-               loader.style.display = 'none';
-               showSuccessOverlay();
-               
-           } catch (err) {
-               console.error('שגיאה בשליחת הנתונים:', err);
-               loader.style.display = 'none';
-               // נמשיך להציג את מסך ההצלחה למרות השגיאה
-               showSuccessOverlay();
-           }
-       }
+        // בדיקה אם התקבל סטטוס 200
+        if (response.status === 200) {
+            loader.style.display = 'none';
+            showSuccessOverlay();
+        } else {
+            loader.style.display = 'none';
+            alert('שגיאה בשליחת הנתונים, אנא נסה שנית');
+        }
+        
+    } catch (err) {
+        console.error('שגיאה בשליחת הנתונים:', err);
+        loader.style.display = 'none';
+        alert('שגיאה בשליחת הנתונים, אנא נסה שנית');
+    }
+}
 
        function showSuccessOverlay() {
            successOverlay.style.display = 'block';
