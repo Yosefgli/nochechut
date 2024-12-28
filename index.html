@@ -326,7 +326,7 @@
    <div class="success-content">
        <div class="success-icon">✓</div>
        <h2><span id="welcomeMessage"></span></h2>
-       <h3>הפעולה בוצעה בהצלחה!</h3>
+       <p style="margin-top: 10px;">הפעולה בוצעה בהצלחה!</p>
        <button class="close-button" onclick="returnToMain()">סגור</button>
    </div>
 </div>
@@ -482,18 +482,9 @@ function cancelAction() {
         });
         
         const responseText = await response.text();
-        console.log('Response from server:', responseText); // כדי שנראה מה מגיע בתגובה
         
-        // ננסה לפרסר את התגובה כ-JSON
-        let responseData;
-        try {
-            responseData = JSON.parse(responseText);
-            document.getElementById('welcomeMessage').textContent = 
-                `שלום ${responseData.shemoved || ''}`;
-        } catch {
-            // אם הפרסור נכשל, נציג הודעה דיפולטיבית
-            document.getElementById('welcomeMessage').textContent = 'פעולה הושלמה בהצלחה';
-        }
+        // נציג את שם העובד אם קיים, אחרת נציג הודעה כללית
+        document.getElementById('welcomeMessage').textContent = 'שלום ' + (responseText || 'משתמש');
         
         loader.style.display = 'none';
         showSuccessOverlay();
