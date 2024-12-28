@@ -323,13 +323,12 @@
 </div>
 
    <div id="successOverlay">
-   <div class="success-content">
-       <div class="success-icon">✓</div>
-       <h2><span id="welcomeMessage"></span></h2>
-       <p style="margin-top: 10px;">הפעולה בוצעה בהצלחה!</p>
-       <button class="close-button" onclick="returnToMain()">סגור</button>
+       <div class="success-content">
+           <div class="success-icon">✓</div>
+           <h2>Операция прошла успешно!</h2>
+           <button class="close-button" onclick="returnToMain()">закрыть</button>
+       </div>
    </div>
-</div>
 
    <div id="loader">
        <div class="spinner"></div>
@@ -467,28 +466,36 @@ function cancelAction() {
 
        async function sendDataToWebhook(code, imageUrl) {
     try {
-        const payload = JSON.stringify({
+        const payload = {
             code: code,
             imageUrl: imageUrl,
-            action: currentAction,
-            shemoved: '' // מוסיף את הפרמטר שהשרת מצפה לו
-        });
+            action: currentAction
+        };
+
+        console.log('Sending payload:', payload);
 
         const response = await fetch(webhookUrl, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
             },
-            body: payload
+            body: JSON.stringify(payload)
         });
         
-        const responseText = await response.text();
+        console.log('Response status:', response.status);
         
-        // נציג את שם העובד אם קיים, אחרת נציג הודעה כללית
-        document.getElementById('welcomeMessage').textContent = 'שלום ' + (responseText || 'משתמש');
-        
-        loader.style.display = 'none';
-        showSuccessOverlay();
+        const responseData = await response.text();
+        console.log('Response data:', responseData);
+
+        // בדיקה אם התקבל סטטוס 200
+        if (response.status === 200) {
+            loader.style.display = 'none';
+            showSuccessOverlay();
+        } else {
+            loader.style.display = 'none';
+            alert('שגיאה בשליחת הנתונים, אנא נסה שנית');
+        }
         
     } catch (err) {
         console.error('שגיאה בשליחת הנתונים:', err);
