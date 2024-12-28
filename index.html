@@ -470,7 +470,8 @@ function cancelAction() {
         const payload = JSON.stringify({
             code: code,
             imageUrl: imageUrl,
-            action: currentAction
+            action: currentAction,
+            shemoved: '' // מוסיף את הפרמטר שהשרת מצפה לו
         });
 
         const response = await fetch(webhookUrl, {
