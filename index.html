@@ -473,7 +473,7 @@ function cancelAction() {
             action: currentAction
         });
 
-        await fetch(webhookUrl, {
+        const response = await fetch(webhookUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -481,9 +481,21 @@ function cancelAction() {
             body: payload
         });
         
-        // אם הגענו לכאן, זה אומר שהשליחה הצליחה
+        const responseText = await response.text();
+        console.log('Response from server:', responseText); // כדי שנראה מה מגיע בתגובה
+        
+        // ננסה לפרסר את התגובה כ-JSON
+        let responseData;
+        try {
+            responseData = JSON.parse(responseText);
+            document.getElementById('welcomeMessage').textContent = 
+                `שלום ${responseData.shemoved || ''}`;
+        } catch {
+            // אם הפרסור נכשל, נציג הודעה דיפולטיבית
+            document.getElementById('welcomeMessage').textContent = 'פעולה הושלמה בהצלחה';
+        }
+        
         loader.style.display = 'none';
-        document.getElementById('welcomeMessage').textContent = 'פעולה הושלמה בהצלחה';
         showSuccessOverlay();
         
     } catch (err) {
