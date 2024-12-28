@@ -323,12 +323,13 @@
 </div>
 
    <div id="successOverlay">
-       <div class="success-content">
-           <div class="success-icon">✓</div>
-           <h2>Операция прошла успешно!</h2>
-           <button class="close-button" onclick="returnToMain()">закрыть</button>
-       </div>
+   <div class="success-content">
+       <div class="success-icon">✓</div>
+       <h2><span id="welcomeMessage"></span></h2>
+       <h3>הפעולה בוצעה בהצלחה!</h3>
+       <button class="close-button" onclick="returnToMain()">סגור</button>
    </div>
+</div>
 
    <div id="loader">
        <div class="spinner"></div>
@@ -485,12 +486,14 @@ function cancelAction() {
         
         console.log('Response status:', response.status);
         
-        const responseData = await response.text();
+        const responseData = await response.json(); // שינוי מ-text() ל-json()
         console.log('Response data:', responseData);
 
-        // בדיקה אם התקבל סטטוס 200
         if (response.status === 200) {
             loader.style.display = 'none';
+            // עדכון הודעת הברכה עם שם העובד
+            document.getElementById('welcomeMessage').textContent = 
+                `שלום ${responseData.shemoved || ''}`;
             showSuccessOverlay();
         } else {
             loader.style.display = 'none';
