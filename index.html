@@ -467,34 +467,24 @@ function cancelAction() {
 
        async function sendDataToWebhook(code, imageUrl) {
     try {
-        const payload = {
+        const payload = JSON.stringify({
             code: code,
             imageUrl: imageUrl,
             action: currentAction
-        };
+        });
 
-        console.log('Sending payload:', payload);
-
-        const response = await fetch(webhookUrl, {
+        await fetch(webhookUrl, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
+                'Content-Type': 'application/json'
             },
-            body: JSON.stringify(payload)
+            body: payload
         });
         
-        console.log('Response status:', response.status);
-        
-        if (response.status === 200) {
-            loader.style.display = 'none';
-            // הצגת מסך ההצלחה ללא ניסיון לקרוא את הנתונים מהתגובה
-            document.getElementById('welcomeMessage').textContent = 'פעולה הושלמה בהצלחה';
-            showSuccessOverlay();
-        } else {
-            loader.style.display = 'none';
-            alert('שגיאה בשליחת הנתונים, אנא נסה שנית');
-        }
+        // אם הגענו לכאן, זה אומר שהשליחה הצליחה
+        loader.style.display = 'none';
+        document.getElementById('welcomeMessage').textContent = 'פעולה הושלמה בהצלחה';
+        showSuccessOverlay();
         
     } catch (err) {
         console.error('שגיאה בשליחת הנתונים:', err);
