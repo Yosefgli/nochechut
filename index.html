@@ -487,21 +487,9 @@ function cancelAction() {
         console.log('Response status:', response.status);
         
         if (response.status === 200) {
-            const responseText = await response.text();
-            console.log('Response text:', responseText);
-            
-            // נסה לפרסר את התשובה כ-JSON אם אפשר
-            let responseData;
-            try {
-                responseData = JSON.parse(responseText);
-            } catch (e) {
-                responseData = { shemoved: '' };  // אם לא הצליח לפרסר, נשתמש באובייקט ריק
-            }
-
             loader.style.display = 'none';
-            // עדכון הודעת הברכה עם שם העובד
-            document.getElementById('welcomeMessage').textContent = 
-                `שלום ${responseData.shemoved || ''}`;
+            // הצגת מסך ההצלחה ללא ניסיון לקרוא את הנתונים מהתגובה
+            document.getElementById('welcomeMessage').textContent = 'פעולה הושלמה בהצלחה';
             showSuccessOverlay();
         } else {
             loader.style.display = 'none';
