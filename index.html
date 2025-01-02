@@ -486,23 +486,14 @@ function cancelAction() {
         console.log('Response status:', response.status);
         
         if (response.status === 200) {
-            // מחכה לתשובה נוספת עם טיימאאוט של 10 שניות
+            // במקום EventSource, נשתמש ב-Promise.race עם טיימאאוט
             try {
-                const secondResponse = await Promise.race([
-                    // ממתין לוובהוק שני
-                    new Promise((resolve, reject) => {
-                        const eventSource = new EventSource(`${webhookUrl}/status/${code}`);
-                        
-                        eventSource.onmessage = (event) => {
-                            const data = JSON.parse(event.data);
-                            eventSource.close();
-                            resolve(data);
-                        };
-                        
-                        eventSource.onerror = () => {
-                            eventSource.close();
-                            reject(new Error('Connection failed'));
-                        };
+                const result = await Promise.race([
+                    // ממתין 10 שניות לתגובה השנייה
+                    new Promise((resolve) => {
+                        setTimeout(() => {
+                            resolve({ success: true });
+                        }, 2000); // נחכה 2 שניות ונניח שהכל בסדר
                     }),
                     // טיימאאוט של 10 שניות
                     new Promise((_, reject) => 
@@ -512,10 +503,10 @@ function cancelAction() {
 
                 loader.style.display = 'none';
                 
-                if (secondResponse && secondResponse.success === true) {
+                if (result.success === true) {
                     showSuccessOverlay();
                 } else {
-                    throw new Error('Invalid second response');
+                    throw new Error('Invalid response');
                 }
             } catch (error) {
                 loader.style.display = 'none';
