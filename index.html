@@ -367,6 +367,7 @@
        const codeScreen = document.getElementById('codeScreen');
        const webhookUrl = 'https://hook.integrator.boost.space/qz92yedayd5kqvxihlc9b8xg6umk87pn';
        const imgbbApiKey = '8a5d2394f52a7b0dba4433d8255a7436';
+       const errorOverlay = document.getElementById('errorOverlay');
 
        function showCodeScreen(action) {
            currentAction = action;
@@ -374,6 +375,11 @@
            codeScreen.classList.add('active');
            startCamera();
        }
+
+      function showErrorOverlay() {
+         loader.style.display = 'none';
+         document.getElementById('errorOverlay').style.display = 'block';
+      }
 
        function returnToMain() {
            successOverlay.style.display = 'none';
