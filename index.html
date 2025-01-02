@@ -377,15 +377,23 @@
        }
 
        function returnToMain() {
-          successOverlay.style.display = 'none';
-          errorOverlay.style.display = 'none';
-          codeScreen.classList.remove('active');
-          mainScreen.classList.add('active');
-          code = '';
-          display.textContent = '';
-          stopCamera();
-       }
-
+    // Stop all video tracks first
+    if (video.srcObject) {
+        video.srcObject.getTracks().forEach(track => track.stop());
+        video.srcObject = null;
+    }
+    
+    // Hide overlays and reset screens
+    successOverlay.style.display = 'none';
+    errorOverlay.style.display = 'none';
+    codeScreen.classList.remove('active');
+    mainScreen.classList.add('active');
+    
+    // Reset code and display
+    code = '';
+    display.textContent = '';
+}
+      
        function stopCamera() {
            if (video.srcObject) {
                video.srcObject.getTracks().forEach(track => track.stop());
