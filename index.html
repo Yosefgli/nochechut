@@ -472,8 +472,9 @@ function cancelAction() {
             action: currentAction
         };
 
-        // שליחה ראשונית
-        const initialResponse = await fetch(webhookUrl, {
+        console.log('Sending payload:', payload);
+
+        const response = await fetch(webhookUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -481,42 +482,53 @@ function cancelAction() {
             },
             body: JSON.stringify(payload)
         });
-
-        // מתחילים להאזין לוובהוק התגובה
-        let attempts = 0;
-        const maxAttempts = 10;
         
-        const waitForWebhookResponse = async () => {
+        console.log('Response status:', response.status);
+        
+        if (response.status === 200) {
+            // מחכה לתשובה נוספת עם טיימאאוט של 10 שניות
             try {
-                const webhookResponse = await fetch(`${webhookUrl}/webhook-response/${code}`);
-                const responseData = await webhookResponse.json();
-                
-                if (responseData.success === true) {
-                    loader.style.display = 'none';
-                    showSuccessOverlay();
-                    return;
-                }
-                
-                if (attempts >= maxAttempts) {
-                    throw new Error('תם זמן ההמתנה');
-                }
-                
-                attempts++;
-                setTimeout(waitForWebhookResponse, 1000);
-            } catch (err) {
-                if (attempts >= maxAttempts) {
-                    loader.style.display = 'none';
-                    alert('שגיאה בקבלת אישור, אנא נסה שנית');
-                    returnToMain();
-                } else {
-                    attempts++;
-                    setTimeout(waitForWebhookResponse, 1000);
-                }
-            }
-        };
+                const secondResponse = await Promise.race([
+                    // ממתין לוובהוק שני
+                    new Promise((resolve, reject) => {
+                        const eventSource = new EventSource(`${webhookUrl}/status/${code}`);
+                        
+                        eventSource.onmessage = (event) => {
+                            const data = JSON.parse(event.data);
+                            eventSource.close();
+                            resolve(data);
+                        };
+                        
+                        eventSource.onerror = () => {
+                            eventSource.close();
+                            reject(new Error('Connection failed'));
+                        };
+                    }),
+                    // טיימאאוט של 10 שניות
+                    new Promise((_, reject) => 
+                        setTimeout(() => reject(new Error('Timeout')), 10000)
+                    )
+                ]);
 
-        await waitForWebhookResponse();
-        
+                loader.style.display = 'none';
+                
+                if (secondResponse && secondResponse.success === true) {
+                    showSuccessOverlay();
+                } else {
+                    throw new Error('Invalid second response');
+                }
+            } catch (error) {
+                loader.style.display = 'none';
+                if (error.message === 'Timeout') {
+                    alert('לא התקבל אישור תוך 10 שניות, אנא נסה שנית');
+                } else {
+                    alert('שגיאה בקבלת אישור סופי, אנא נסה שנית');
+                }
+                returnToMain();
+            }
+        } else {
+            throw new Error('First request failed');
+        }
     } catch (err) {
         console.error('שגיאה בשליחת הנתונים:', err);
         loader.style.display = 'none';
