@@ -518,30 +518,25 @@ function cancelAction() {
 
             try {
                 const secondResponse = await Promise.race([response.json(), timeoutPromise]);
-
                 console.log('Second response data:', secondResponse);
                 showSuccessOverlay();
             } catch (err) {
                 console.error('Error waiting for second response or parsing:', err);
                 showErrorOverlay('שגיאה בתגובה השנייה, אנא נסה שנית');
-                returnToMain();
             }
         } else if (response.status === 202) {
             showSuccessOverlay();
         } else {
             console.error('Response status indicates failure:', response.status);
             showErrorOverlay('שגיאה בשליחת הנתונים, אנא נסה שנית');
-            returnToMain();
         }
 
     } catch (err) {
         console.error('שגיאה בשליחת הנתונים:', err);
         loader.style.display = 'none';
         showErrorOverlay('שגיאה בשליחת הנתונים, אנא נסה שנית');
-        returnToMain();
     }
 }
-
        function showSuccessOverlay() {
            successOverlay.style.display = 'block';
        }
