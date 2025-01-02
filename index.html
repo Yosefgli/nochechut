@@ -203,6 +203,19 @@
            transition: background 0.3s ease;
        }
 
+      .error-icon {
+         width: 80px;
+         height: 80px;
+         background: #f44336;
+         border-radius: 50%;;
+         margin: 0 auto 20px;
+         display: flex;
+         align-items: center;
+         justify-content: center;
+         color: white;
+         font-size: 40px;
+      }
+
        #loader {
            display: none;
            position: fixed;
@@ -334,6 +347,14 @@
        <div class="spinner"></div>
    </div>
 
+   <div id="errorOverlay" style="display: none;">
+    <div class="success-content">
+        <div class="error-icon">✕</div>
+        <h2>שגיאה בפעולה!</h2>
+        <button class="close-button" onclick="returnToMain()">סגור</button>
+    </div>
+</div>
+
    <script>
        let code = '';
        let currentAction = '';
@@ -381,8 +402,8 @@
                video.srcObject = stream;
                video.play();
            } catch (err) {
-               console.error('שגיאה בהפעלת המצלמה:', err);
-               alert('לא הצלחנו לגשת למצלמה. אנא ודא שנתת הרשאת גישה למצלמה.');
+              console.error('שגיאה בהפעלת המצלמה:', err);
+              showErrorOverlay(); // במקום alert
            }
        }
 
@@ -453,14 +474,12 @@ function cancelAction() {
                if (data.success) {
                    await sendDataToWebhook(code, data.data.url);
                } else {
-                   console.error('שגיאה בהעלאת התמונה:', data.error);
-                   alert('שגיאה בהעלאת התמונה, אנא נסה שנית');
-                   loader.style.display = 'none';
+                  console.error('שגיאה בהעלאת התמונה:', data.error);
+                  showErrorOverlay(); // במקום alert
                }
            } catch (err) {
-               console.error('שגיאה בהעלאת התמונה:', err);
-               alert('שגיאה בהעלאת התמונה, אנא נסה שנית');
-               loader.style.display = 'none';
+              console.error('שגיאה בהעלאת התמונה:', err);
+              showErrorOverlay(); // במקום alert
            }
        }
 
@@ -498,21 +517,21 @@ function cancelAction() {
                 showSuccessOverlay();
             } catch (err) {
                 console.error('Error waiting for second response or parsing:', err);
-                alert('שגיאה בתגובה השנייה, אנא נסה שנית');
+                showErrorOverlay('שגיאה בתגובה השנייה, אנא נסה שנית');
                 returnToMain();
             }
         } else if (response.status === 202) {
             showSuccessOverlay();
         } else {
             console.error('Response status indicates failure:', response.status);
-            alert('שגיאה בשליחת הנתונים, אנא נסה שנית');
+            showErrorOverlay('שגיאה בשליחת הנתונים, אנא נסה שנית');
             returnToMain();
         }
 
     } catch (err) {
         console.error('שגיאה בשליחת הנתונים:', err);
         loader.style.display = 'none';
-        alert('שגיאה בשליחת הנתונים, אנא נסה שנית');
+        showErrorOverlay('שגיאה בשליחת הנתונים, אנא נסה שנית');
         returnToMain();
     }
 }
