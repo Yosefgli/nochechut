@@ -490,11 +490,26 @@ function cancelAction() {
 
         loader.style.display = 'none';
 
-        if (response.status === 200) {
-            showSuccessOverlay();
+        // בדיקה מחמירה יותר של הסטטוס
+        if (response.status === 200 && responseData) {
+            try {
+                // נסה לפרסר את התגובה כ-JSON
+                const jsonResponse = JSON.parse(responseData);
+                
+                // וודא שהתגובה מכילה את השדה success או שדה אחר שמציין הצלחה
+                if (jsonResponse && jsonResponse.success === true) {
+                    showSuccessOverlay();
+                } else {
+                    throw new Error('Invalid response structure');
+                }
+            } catch (parseError) {
+                console.error('Error parsing response:', parseError);
+                alert('שגיאה בעיבוד התגובה, אנא נסה שנית');
+                returnToMain();
+            }
         } else {
+            console.error('Server returned non-200 status:', response.status);
             alert('שגיאה בשליחת הנתונים, אנא נסה שנית');
-            // Return to main screen on error
             returnToMain();
         }
         
@@ -502,7 +517,6 @@ function cancelAction() {
         console.error('שגיאה בשליחת הנתונים:', err);
         loader.style.display = 'none';
         alert('שגיאה בשליחת הנתונים, אנא נסה שנית');
-        // Return to main screen on error
         returnToMain();
     }
 }
