@@ -377,12 +377,13 @@
        }
 
        function returnToMain() {
-           successOverlay.style.display = 'none';
-           codeScreen.classList.remove('active');
-           mainScreen.classList.add('active');
-           code = '';
-           display.textContent = '';
-           stopCamera();
+          successOverlay.style.display = 'none';
+          errorOverlay.style.display = 'none';
+          codeScreen.classList.remove('active');
+          mainScreen.classList.add('active');
+          code = '';
+          display.textContent = '';
+          stopCamera();
        }
 
        function stopCamera() {
@@ -538,7 +539,8 @@ function cancelAction() {
       
       function showErrorOverlay() {
          loader.style.display = 'none';
-         document.getElementById('errorOverlay').style.display = 'block';
+         errorOverlay.style.display = 'block';
+         document.getElementById('codeScreen').classList.remove('active');
       }
 
 
