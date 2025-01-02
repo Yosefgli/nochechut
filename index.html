@@ -376,11 +376,6 @@
            startCamera();
        }
 
-      function showErrorOverlay() {
-         loader.style.display = 'none';
-         document.getElementById('errorOverlay').style.display = 'block';
-      }
-
        function returnToMain() {
            successOverlay.style.display = 'none';
            codeScreen.classList.remove('active');
@@ -540,6 +535,12 @@ function cancelAction() {
        function showSuccessOverlay() {
            successOverlay.style.display = 'block';
        }
+      
+      function showErrorOverlay() {
+         loader.style.display = 'none';
+         document.getElementById('errorOverlay').style.display = 'block';
+      }
+
 
        document.querySelectorAll('.key').forEach(key => {
            key.addEventListener('click', () => {
