@@ -485,17 +485,26 @@ function cancelAction() {
         
         console.log('Response status:', response.status);
         
-        if (response.status === 200) {
-            // במקום EventSource, נשתמש ב-Promise.race עם טיימאאוט
+        if (response.status === 202) { // First response should be 202 (Accepted)
             try {
                 const result = await Promise.race([
-                    // ממתין 10 שניות לתגובה השנייה
+                    // Wait for second response with status 200
                     new Promise((resolve) => {
-                        setTimeout(() => {
-                            resolve({ success: true });
-                        }, 2000); // נחכה 2 שניות ונניח שהכל בסדר
+                        const checkStatus = async () => {
+                            try {
+                                const statusResponse = await fetch(`${webhookUrl}/status/${code}`);
+                                if (statusResponse.status === 200) {
+                                    resolve({ success: true });
+                                } else {
+                                    setTimeout(checkStatus, 1000); // Check every second
+                                }
+                            } catch (error) {
+                                setTimeout(checkStatus, 1000); // Retry on error
+                            }
+                        };
+                        checkStatus();
                     }),
-                    // טיימאאוט של 10 שניות
+                    // 10 second timeout
                     new Promise((_, reject) => 
                         setTimeout(() => reject(new Error('Timeout')), 10000)
                     )
