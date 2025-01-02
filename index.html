@@ -472,7 +472,8 @@ function cancelAction() {
             action: currentAction
         };
 
-        const response = await fetch(webhookUrl, {
+        // שליחה ראשונית
+        const initialResponse = await fetch(webhookUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -481,47 +482,41 @@ function cancelAction() {
             body: JSON.stringify(payload)
         });
 
-        if (response.status === 200) {
-            // נתחיל להמתין לתשובה מהוובהוק
-            let attempts = 0;
-            const maxAttempts = 30; // ננסה למשך 30 שניות
-            
-            const checkStatus = async () => {
-                if (attempts >= maxAttempts) {
+        // מתחילים להאזין לוובהוק התגובה
+        let attempts = 0;
+        const maxAttempts = 10;
+        
+        const waitForWebhookResponse = async () => {
+            try {
+                const webhookResponse = await fetch(`${webhookUrl}/webhook-response/${code}`);
+                const responseData = await webhookResponse.json();
+                
+                if (responseData.success === true) {
                     loader.style.display = 'none';
-                    alert('תם הזמן המוקצב לאישור, אנא נסה שנית');
-                    returnToMain();
+                    showSuccessOverlay();
                     return;
                 }
-
-                try {
-                    const statusResponse = await fetch(`${webhookUrl}/status/${code}`, {
-                        method: 'GET',
-                        headers: {
-                            'Accept': 'application/json'
-                        }
-                    });
-
-                    const statusData = await statusResponse.json();
-
-                    if (statusData.success === true) {
-                        loader.style.display = 'none';
-                        showSuccessOverlay();
-                        return;
-                    }
-
-                    attempts++;
-                    setTimeout(checkStatus, 1000); // נבדוק שוב בעוד שנייה
-                } catch (err) {
-                    attempts++;
-                    setTimeout(checkStatus, 1000);
+                
+                if (attempts >= maxAttempts) {
+                    throw new Error('תם זמן ההמתנה');
                 }
-            };
+                
+                attempts++;
+                setTimeout(waitForWebhookResponse, 1000);
+            } catch (err) {
+                if (attempts >= maxAttempts) {
+                    loader.style.display = 'none';
+                    alert('שגיאה בקבלת אישור, אנא נסה שנית');
+                    returnToMain();
+                } else {
+                    attempts++;
+                    setTimeout(waitForWebhookResponse, 1000);
+                }
+            }
+        };
 
-            await checkStatus();
-        } else {
-            throw new Error('שגיאה בשליחת הנתונים');
-        }
+        await waitForWebhookResponse();
+        
     } catch (err) {
         console.error('שגיאה בשליחת הנתונים:', err);
         loader.style.display = 'none';
