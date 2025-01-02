@@ -488,22 +488,24 @@ function cancelAction() {
         const responseData = await response.text();
         console.log('Response data:', responseData);
 
-        // בדיקה אם התקבל סטטוס 200
+        loader.style.display = 'none';
+
         if (response.status === 200) {
-            loader.style.display = 'none';
             showSuccessOverlay();
         } else {
-            loader.style.display = 'none';
             alert('שגיאה בשליחת הנתונים, אנא נסה שנית');
+            // Return to main screen on error
+            returnToMain();
         }
         
     } catch (err) {
         console.error('שגיאה בשליחת הנתונים:', err);
         loader.style.display = 'none';
         alert('שגיאה בשליחת הנתונים, אנא נסה שנית');
+        // Return to main screen on error
+        returnToMain();
     }
 }
-
        function showSuccessOverlay() {
            successOverlay.style.display = 'block';
        }
