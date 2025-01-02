@@ -482,32 +482,33 @@ function cancelAction() {
             },
             body: JSON.stringify(payload)
         });
-        
+
         console.log('Response status:', response.status);
-        
-        const responseData = await response.text();
-        console.log('Response data:', responseData);
 
-        loader.style.display = 'none';
+        if (response.status === 200) {
+            // חכה לתגובה שנייה עד 10 שניות
+            const timeoutPromise = new Promise((_, reject) => {
+                setTimeout(() => reject(new Error('Timeout waiting for second response')), 10000);
+            });
 
-        try {
-            // נסה לפרסר את התגובה כ-JSON
-            const jsonResponse = JSON.parse(responseData);
-            
-            // בדוק אם יש success: true
-            if (jsonResponse && jsonResponse.success === true) {
+            try {
+                const secondResponse = await Promise.race([response.json(), timeoutPromise]);
+
+                console.log('Second response data:', secondResponse);
                 showSuccessOverlay();
-            } else {
-                console.error('Response missing success flag or success is false');
-                alert('שגיאה בשליחת הנתונים, אנא נסה שנית');
+            } catch (err) {
+                console.error('Error waiting for second response or parsing:', err);
+                alert('שגיאה בתגובה השנייה, אנא נסה שנית');
                 returnToMain();
             }
-        } catch (parseError) {
-            console.error('Error parsing response:', parseError);
-            alert('שגיאה בעיבוד התגובה, אנא נסה שנית');
+        } else if (response.status === 202) {
+            showSuccessOverlay();
+        } else {
+            console.error('Response status indicates failure:', response.status);
+            alert('שגיאה בשליחת הנתונים, אנא נסה שנית');
             returnToMain();
         }
-        
+
     } catch (err) {
         console.error('שגיאה בשליחת הנתונים:', err);
         loader.style.display = 'none';
@@ -515,6 +516,7 @@ function cancelAction() {
         returnToMain();
     }
 }
+
        function showSuccessOverlay() {
            successOverlay.style.display = 'block';
        }
