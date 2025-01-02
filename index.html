@@ -369,36 +369,53 @@
        const imgbbApiKey = '8a5d2394f52a7b0dba4433d8255a7436';
        const errorOverlay = document.getElementById('errorOverlay');
 
-       function showCodeScreen(action) {
-           currentAction = action;
-           mainScreen.classList.remove('active');
-           codeScreen.classList.add('active');
-           startCamera();
-       }
-
-       function returnToMain() {
-    // Stop all video tracks first
+       function stopCamera() {
     if (video.srcObject) {
-        video.srcObject.getTracks().forEach(track => track.stop());
+        const tracks = video.srcObject.getTracks();
+        tracks.forEach(track => {
+            track.stop();
+            track.enabled = false;
+        });
         video.srcObject = null;
+        video.load(); // Force video element cleanup
     }
+}
+
+function returnToMain() {
+    // Stop camera first
+    stopCamera();
     
-    // Hide overlays and reset screens
+    // Reset UI state
     successOverlay.style.display = 'none';
     errorOverlay.style.display = 'none';
+    loader.style.display = 'none';
+    
+    // Clear any pending timeouts
+    clearTimeout(window.returnTimeout);
+    
+    // Reset screens
     codeScreen.classList.remove('active');
     mainScreen.classList.add('active');
     
-    // Reset code and display
+    // Reset input state
     code = '';
     display.textContent = '';
+    
+    // Force a small delay before allowing new camera init
+    window.returnTimeout = setTimeout(() => {
+        mainScreen.classList.add('active');
+    }, 100);
 }
-      
-       function stopCamera() {
-           if (video.srcObject) {
-               video.srcObject.getTracks().forEach(track => track.stop());
-           }
-       }
+
+function showCodeScreen(action) {
+    stopCamera(); // Ensure camera is stopped before starting new session
+    currentAction = action;
+    mainScreen.classList.remove('active');
+    codeScreen.classList.add('active');
+    setTimeout(() => {
+        startCamera();
+    }, 100);
+}
 
        async function startCamera() {
            try {
