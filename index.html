@@ -490,26 +490,21 @@ function cancelAction() {
 
         loader.style.display = 'none';
 
-        // בדיקה מחמירה יותר של הסטטוס
-        if (response.status === 200 && responseData) {
-            try {
-                // נסה לפרסר את התגובה כ-JSON
-                const jsonResponse = JSON.parse(responseData);
-                
-                // וודא שהתגובה מכילה את השדה success או שדה אחר שמציין הצלחה
-                if (jsonResponse && jsonResponse.success === true) {
-                    showSuccessOverlay();
-                } else {
-                    throw new Error('Invalid response structure');
-                }
-            } catch (parseError) {
-                console.error('Error parsing response:', parseError);
-                alert('שגיאה בעיבוד התגובה, אנא נסה שנית');
+        try {
+            // נסה לפרסר את התגובה כ-JSON
+            const jsonResponse = JSON.parse(responseData);
+            
+            // בדוק אם יש success: true
+            if (jsonResponse && jsonResponse.success === true) {
+                showSuccessOverlay();
+            } else {
+                console.error('Response missing success flag or success is false');
+                alert('שגיאה בשליחת הנתונים, אנא נסה שנית');
                 returnToMain();
             }
-        } else {
-            console.error('Server returned non-200 status:', response.status);
-            alert('שגיאה בשליחת הנתונים, אנא נסה שנית');
+        } catch (parseError) {
+            console.error('Error parsing response:', parseError);
+            alert('שגיאה בעיבוד התגובה, אנא נסה שנית');
             returnToMain();
         }
         
