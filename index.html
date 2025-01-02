@@ -485,50 +485,29 @@ function cancelAction() {
         
         console.log('Response status:', response.status);
         
-        if (response.status === 202) { // First response should be 202 (Accepted)
-            try {
-                const result = await Promise.race([
-                    // Wait for second response with status 200
-                    new Promise((resolve) => {
-                        const checkStatus = async () => {
-                            try {
-                                const statusResponse = await fetch(`${webhookUrl}/status/${code}`);
-                                if (statusResponse.status === 200) {
-                                    resolve({ success: true });
-                                } else {
-                                    setTimeout(checkStatus, 1000); // Check every second
-                                }
-                            } catch (error) {
-                                setTimeout(checkStatus, 1000); // Retry on error
-                            }
-                        };
-                        checkStatus();
-                    }),
-                    // 10 second timeout
-                    new Promise((_, reject) => 
-                        setTimeout(() => reject(new Error('Timeout')), 10000)
-                    )
-                ]);
+        const responseData = await response.text();
+        console.log('Response data:', responseData);
 
-                loader.style.display = 'none';
-                
-                if (result.success === true) {
-                    showSuccessOverlay();
-                } else {
-                    throw new Error('Invalid response');
-                }
-            } catch (error) {
-                loader.style.display = 'none';
-                if (error.message === 'Timeout') {
-                    alert('לא התקבל אישור תוך 10 שניות, אנא נסה שנית');
-                } else {
-                    alert('שגיאה בקבלת אישור סופי, אנא נסה שנית');
-                }
+        loader.style.display = 'none';
+
+        try {
+            // נסה לפרסר את התגובה כ-JSON
+            const jsonResponse = JSON.parse(responseData);
+            
+            // בדוק אם יש success: true
+            if (jsonResponse && jsonResponse.success === true) {
+                showSuccessOverlay();
+            } else {
+                console.error('Response missing success flag or success is false');
+                alert('שגיאה בשליחת הנתונים, אנא נסה שנית');
                 returnToMain();
             }
-        } else {
-            throw new Error('First request failed');
+        } catch (parseError) {
+            console.error('Error parsing response:', parseError);
+            alert('שגיאה בעיבוד התגובה, אנא נסה שנית');
+            returnToMain();
         }
+        
     } catch (err) {
         console.error('שגיאה בשליחת הנתונים:', err);
         loader.style.display = 'none';
