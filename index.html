@@ -39,7 +39,7 @@
            gap: 20px;
            width: 100%;
            max-width: 500px;
-           min-height: 300px; /* גובה מינימלי למסך הראשי */
+           min-height: 300px;
            justify-content: center;
        }
 
@@ -49,8 +49,8 @@
            -webkit-backdrop-filter: blur(10px);
            border: 1px solid rgba(255, 255, 255, 0.2);
            border-radius: 20px;
-           padding: 80px; /* הגדלת הפדינג */
-           font-size: 80px; /* הגדלת גודל הפונט */
+           padding: 80px;
+           font-size: 80px;
            color: white;
            cursor: pointer;
            transition: all 0.3s ease;
@@ -66,19 +66,19 @@
            background: #f44336;
        }
 
-      .shabbat-button {
-    background: #FFD700;  /* צהוב */
-    color: black;  /* טקסט שחור בשביל קריאות טובה יותר על רקע צהוב */
-}
+       .shabbat-button {
+           background: #FFD700;
+           color: black;
+       }
 
-.event-button {
-    background: white;
-    color: black;  /* טקסט שחור בשביל קריאות טובה יותר על רקע לבן */
-}
+       .event-button {
+           background: white;
+           color: black;
+       }
 
-      .shabbat-button, .event-button {
-    display: none;
-}
+       .shabbat-button, .event-button {
+           display: none;
+       }
 
        .action-button:hover {
            transform: scale(1.02);
@@ -147,7 +147,7 @@
            background: #f44336;
        }
 
-       #successOverlay {
+       #successOverlay, #confirmationOverlay {
            display: none;
            position: fixed;
            top: 0;
@@ -203,6 +203,16 @@
            transition: background 0.3s ease;
        }
 
+       #confirmationDetails {
+           font-size: 18px;
+           line-height: 1.5;
+           color: #333;
+       }
+
+       #confirmationDetails p {
+           margin: 10px 0;
+       }
+
        #loader {
            display: none;
            position: fixed;
@@ -239,28 +249,6 @@
            display: block;
        }
 
-      #confirmationOverlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
-    z-index: 1000;
-}
-
-#confirmationDetails {
-    font-size: 18px;
-    line-height: 1.5;
-    color: #333;
-}
-
-#confirmationDetails p {
-    margin: 10px 0;
-}
-
        @media (max-width: 380px) {
            .key {
                padding: 15px;
@@ -276,11 +264,11 @@
 </head>
 <body>
    <div id="mainScreen" class="main-screen active">
-    <button class="action-button entry-button" onclick="showCodeScreen('entry')">Приход</button>
-    <button class="action-button exit-button" onclick="showCodeScreen('exit')">Уход</button>
-    <button class="action-button shabbat-button" onclick="showCodeScreen('shabbat')">Суббота</button>
-    <button class="action-button event-button" onclick="showCodeScreen('event')">банкет</button>
-</div>
+       <button class="action-button entry-button" onclick="showCodeScreen('entry')">Приход</button>
+       <button class="action-button exit-button" onclick="showCodeScreen('exit')">Уход</button>
+       <button class="action-button shabbat-button" onclick="showCodeScreen('shabbat')">Суббота</button>
+       <button class="action-button event-button" onclick="showCodeScreen('event')">банкет</button>
+   </div>
 
    <div id="codeScreen" class="container">
        <div id="videoContainer">
@@ -306,21 +294,21 @@
        </div>
    </div>
 
-   <div id="confirmationOverlay" style="display: none;">
-    <div class="success-content">
-        <h2>Подтвердить действие</h2>
-        <div id="confirmationDetails" style="text-align: left; margin: 20px 0;">
-            <p>тип действия: <span id="actionType"></span></p>
-            <p>время: <span id="currentTime"></span></p>
-            <p>рабочий номер: <span id="confirmCode"></span></p>
-            <img id="capturedImage" style="max-width: 100%; margin-top: 10px; border-radius: 10px;" />
-        </div>
-        <div style="display: flex; gap: 10px; justify-content: center;"> 
-            <button class="close-button" style="background: #f44336;" onclick="cancelAction()">отмена</button>
-            <button class="close-button" onclick="confirmAction()">подтверждение</button>
-        </div>
-    </div>
-</div>
+   <div id="confirmationOverlay">
+       <div class="success-content">
+           <h2>Подтвердить действие</h2>
+           <div id="confirmationDetails" style="text-align: left; margin: 20px 0;">
+               <p>тип действия: <span id="actionType"></span></p>
+               <p>время: <span id="currentTime"></span></p>
+               <p>рабочий номер: <span id="confirmCode"></span></p>
+               <img id="capturedImage" style="max-width: 100%; margin-top: 10px; border-radius: 10px;" />
+           </div>
+           <div style="display: flex; gap: 10px; justify-content: center;"> 
+               <button class="close-button" style="background: #f44336;" onclick="cancelAction()">отмена</button>
+               <button class="close-button" onclick="confirmAction()">подтверждение</button>
+           </div>
+       </div>
+   </div>
 
    <div id="successOverlay">
        <div class="success-content">
@@ -381,62 +369,46 @@
                video.srcObject = stream;
                video.play();
            } catch (err) {
-               console.error('שגיאה בהפעלת המצלמה:', err);
+               console.error('Camera error:', err);
                alert('לא הצלחנו לגשת למצלמה. אנא ודא שנתת הרשאת גישה למצלמה.');
            }
        }
 
        function captureAndUpload() {
-    loader.style.display = 'flex';
-    
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    canvas.getContext('2d').drawImage(video, 0, 0);
-    
-    const imageBase64 = canvas.toDataURL('image/jpeg', 0.7);
-    
-    // הצג את חלונית האישור
-    showConfirmationOverlay(imageBase64);
-}
+           canvas.width = video.videoWidth;
+           canvas.height = video.videoHeight;
+           canvas.getContext('2d').drawImage(video, 0, 0);
+           
+           const imageBase64 = canvas.toDataURL('image/jpeg', 0.7);
+           showConfirmationOverlay(imageBase64);
+       }
 
-function showConfirmationOverlay(imageBase64) {
-    loader.style.display = 'none';
-    
-    // עדכן את פרטי האישור
-    document.getElementById('actionType').textContent = 
-        currentAction === 'entry' ? 'вход' : 'Выход';
-    
-    const now = new Date();
-    document.getElementById('currentTime').textContent = 
-        now.toLocaleTimeString('he-IL');
-    
-    document.getElementById('confirmCode').textContent = code;
-    document.getElementById('capturedImage').src = imageBase64;
-    
-    // הצג את החלונית
-    document.getElementById('confirmationOverlay').style.display = 'block';
-}
+       function showConfirmationOverlay(imageBase64) {
+           document.getElementById('actionType').textContent = 
+               currentAction === 'entry' ? 'вход' : 'Выход';
+           
+           const now = new Date();
+           document.getElementById('currentTime').textContent = 
+               now.toLocaleTimeString('he-IL');
+           
+           document.getElementById('confirmCode').textContent = code;
+           document.getElementById('capturedImage').src = imageBase64;
+           
+           document.getElementById('confirmationOverlay').style.display = 'block';
+       }
 
-function confirmAction() {
-    // המשך עם העלאת התמונה והשליחה לוובהוק
-    const imageBase64 = document.getElementById('capturedImage').src.split(',')[1];
-    document.getElementById('confirmationOverlay').style.display = 'none';
-    loader.style.display = 'flex';
-    uploadToImgBB(imageBase64);
-}
+       function confirmAction() {
+           document.getElementById('confirmationOverlay').style.display = 'none';
+           loader.style.display = 'flex';
+           
+           const imageBase64 = document.getElementById('capturedImage').src.split(',')[1];
+           uploadToImgBB(imageBase64);
+       }
 
-function cancelAction() {
-    // הסתר את חלונית האישור
-    document.getElementById('confirmationOverlay').style.display = 'none';
-    // עצור את המצלמה
-    stopCamera();
-    // נקה את הקוד
-    code = '';
-    display.textContent = '';
-    // החזר למסך הראשי
-    codeScreen.classList.remove('active');
-    mainScreen.classList.add('active');
-}
+       function cancelAction() {
+           document.getElementById('confirmationOverlay').style.display = 'none';
+           returnToMain();
+       }
 
        async function uploadToImgBB(base64Image) {
            const formData = new FormData();
@@ -453,93 +425,31 @@ function cancelAction() {
                if (data.success) {
                    await sendDataToWebhook(code, data.data.url);
                } else {
-                   console.error('שגיאה בהעלאת התמונה:', data.error);
-                   alert('שגיאה בהעלאת התמונה, אנא נסה שנית');
+                   console.error('Image upload error:', data.error);
                    loader.style.display = 'none';
+                   alert('שגיאה בהעלאת התמונה, אנא נסה שנית');
+                   returnToMain();
                }
            } catch (err) {
-               console.error('שגיאה בהעלאת התמונה:', err);
-               alert('שגיאה בהעלאת התמונה, אנא נסה שנית');
+               console.error('Image upload error:', err);
                loader.style.display = 'none';
+               alert('שגיאה בהעלאת התמונה, אנא נסה שנית');
+               returnToMain();
            }
        }
 
        async function sendDataToWebhook(code, imageUrl) {
-    try {
-        const payload = {
-            code: code,
-            imageUrl: imageUrl,
-            action: currentAction
-        };
+           try {
+               const payload = {
+                   code: code,
+                   imageUrl: imageUrl,
+                   action: currentAction
+               };
 
-        console.log('Sending payload:', payload);
+               console.log('Sending payload:', payload);
 
-        const response = await fetch(webhookUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify(payload)
-        });
-        
-        console.log('Response status:', response.status);
-        
-        const responseData = await response.text();
-        console.log('Response data:', responseData);
-
-        loader.style.display = 'none';
-
-        try {
-            // נסה לפרסר את התגובה כ-JSON
-            const jsonResponse = JSON.parse(responseData);
-            
-            // בדוק אם יש success: true
-            if (jsonResponse && jsonResponse.success === true) {
-                showSuccessOverlay();
-            } else {
-                console.error('Response missing success flag or success is false');
-                alert('שגיאה בשליחת הנתונים, אנא נסה שנית');
-                returnToMain();
-            }
-        } catch (parseError) {
-            console.error('Error parsing response:', parseError);
-            alert('שגיאה בעיבוד התגובה, אנא נסה שנית');
-            returnToMain();
-        }
-        
-    } catch (err) {
-        console.error('שגיאה בשליחת הנתונים:', err);
-        loader.style.display = 'none';
-        alert('שגיאה בשליחת הנתונים, אנא נסה שנית');
-        returnToMain();
-    }
-}
-       function showSuccessOverlay() {
-           successOverlay.style.display = 'block';
-       }
-
-       document.querySelectorAll('.key').forEach(key => {
-           key.addEventListener('click', () => {
-               const value = key.textContent;
-               
-               if (value === 'C') {
-                   code = '';
-               } else if (value === '⏎') {
-                   if (code.length > 0) {
-                       captureAndUpload();
-                   }
-               } else if (code.length < 8) {
-                   code += value;
-               }
-               
-               display.textContent = code;
-           });
-       });
-
-       // Initialize with main screen visible
-       mainScreen.classList.add('active');
-       codeScreen.classList.remove('active');
-   </script>
-</body>
-</html>
+               const response = await fetch(webhookUrl, {
+                   method: 'POST',
+                   headers: {
+                       'Content-Type': 'application/json',
+                       'Accept':
