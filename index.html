@@ -418,21 +418,24 @@ function showCodeScreen(action) {
 }
 
        async function startCamera() {
-           try {
-               const stream = await navigator.mediaDevices.getUserMedia({ 
-                   video: { 
-                       facingMode: 'user',
-                       width: { ideal: 1280 },
-                       height: { ideal: 720 }
-                   } 
-               });
-               video.srcObject = stream;
-               video.play();
-           } catch (err) {
-              console.error('שגיאה בהפעלת המצלמה:', err);
-              showErrorOverlay(); // במקום alert
-           }
-       }
+    try {
+        if (video.srcObject) {
+            stopCamera(); // ודא שהמצלמה הקודמת נסגרה
+        }
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+            video: { 
+                facingMode: 'user',
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            } 
+        });
+        video.srcObject = stream;
+        await video.play(); // המתן שהוידאו יתחיל לנגן
+    } catch (err) {
+        console.error('Camera error:', err);
+        showErrorOverlay();
+    }
+}
 
        function captureAndUpload() {
     loader.style.display = 'flex';
@@ -487,16 +490,17 @@ function cancelAction() {
 }
 
        async function uploadToImgBB(base64Image) {
-           const formData = new FormData();
-           formData.append('image', base64Image);
-
-           try {
-               const response = await fetch(`https://api.imgbb.com/1/upload?key=${imgbbApiKey}`, {
-                   method: 'POST',
-                   body: formData
-               });
-
-               const data = await response.json();
+    const timeout = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Upload timeout')), 30000)
+    );
+    
+    try {
+        const uploadPromise = fetch(`https://api.imgbb.com/1/upload?key=${imgbbApiKey}`, {
+            method: 'POST',
+            body: new FormData().append('image', base64Image)
+        });
+        
+        const response = await Promise.race([uploadPromise, timeout]);
                
                if (data.success) {
                    await sendDataToWebhook(code, data.data.url);
@@ -505,34 +509,36 @@ function cancelAction() {
                   showErrorOverlay(); // במקום alert
                }
            } catch (err) {
-              console.error('שגיאה בהעלאת התמונה:', err);
-              showErrorOverlay(); // במקום alert
-           }
-       }
+        console.error('Upload error:', err);
+        showErrorOverlay();
+    }
+}
 
        async function sendDataToWebhook(code, imageUrl) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
+    
     try {
-        const payload = {
-            code: code,
-            imageUrl: imageUrl,
-            action: currentAction
-        };
-
-        console.log('Sending payload:', payload);
-
         const response = await fetch(webhookUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
             },
-            body: JSON.stringify(payload)
+            body: JSON.stringify({
+                code,
+                imageUrl,
+                action: currentAction,
+                timestamp: Date.now()
+            }),
+            signal: controller.signal
         });
 
+        clearTimeout(timeoutId);
         console.log('Response status:', response.status);
 
         if (response.status === 200) {
-            // חכה לתגובה שנייה עד 10 שניות
+            // המתנה לתגובה השנייה עם timeout של 10 שניות
             const timeoutPromise = new Promise((_, reject) => {
                 setTimeout(() => reject(new Error('Timeout waiting for second response')), 10000);
             });
@@ -542,32 +548,51 @@ function cancelAction() {
                 console.log('Second response data:', secondResponse);
                 showSuccessOverlay();
             } catch (err) {
-                console.error('Error waiting for second response or parsing:', err);
+                console.error('Error waiting for second response:', err);
                 showErrorOverlay('שגיאה בתגובה השנייה, אנא נסה שנית');
             }
         } else if (response.status === 202) {
+            // תגובה מיידית - הצג הצלחה
             showSuccessOverlay();
         } else {
-            console.error('Response status indicates failure:', response.status);
-            showErrorOverlay('שגיאה בשליחת הנתונים, אנא נסה שנית');
+            throw new Error(`Server error: ${response.status}`);
         }
-
     } catch (err) {
-        console.error('שגיאה בשליחת הנתונים:', err);
+        console.error('Webhook error:', err);
+        showErrorOverlay();
+    } finally {
         loader.style.display = 'none';
-        showErrorOverlay('שגיאה בשליחת הנתונים, אנא נסה שנית');
     }
 }
        function showSuccessOverlay() {
            successOverlay.style.display = 'block';
        }
       
-      function showErrorOverlay() {
-         loader.style.display = 'none';
-         errorOverlay.style.display = 'block';
-         document.getElementById('codeScreen').classList.remove('active');
-      }
+      function showErrorOverlay(message = 'אירעה שגיאה, אנא נסה שנית') {
+    cleanup();
+    const errorMessage = document.querySelector('#errorOverlay h2');
+    errorMessage.textContent = message;
+    errorOverlay.style.display = 'block';
+    setTimeout(() => {
+        errorOverlay.style.display = 'none';
+        resetApp();
+    }, 3000);
+}
+      function cleanup() {
+    stopCamera();
+    code = '';
+    display.textContent = '';
+    loader.style.display = 'none';
+    document.getElementById('confirmationOverlay').style.display = 'none';
+    successOverlay.style.display = 'none';
+    errorOverlay.style.display = 'none';
+}
 
+function resetApp() {
+    cleanup();
+    mainScreen.classList.add('active');
+    codeScreen.classList.remove('active');
+}
 
        document.querySelectorAll('.key').forEach(key => {
            key.addEventListener('click', () => {
